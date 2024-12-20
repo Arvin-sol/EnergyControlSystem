@@ -17,6 +17,7 @@ public class Equipment : BaseEntity<ulong>,IAggregateRoot
 
     private Equipment(string name, EquipmentType type)
     {
+        Validattion(name, type);
         Name = name;
         Type = type;
     }
@@ -32,15 +33,12 @@ public class Equipment : BaseEntity<ulong>,IAggregateRoot
         _usageLogs.Add(log);
         LastUpdated = DateTime.Now;
     }
-    private static void ValidateName(string name)
+    private static void Validattion(string name, EquipmentType type)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException<Equipment>("Equipment name is required.");
-    }
-
-    private static void ValidateConsumption(decimal consumption)
-    {
-        if (consumption <= 0)
+        if (type <= 0)
             throw new DomainException<Equipment>("Energy consumption must be greater than zero.");
     }
+
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Common;
+namespace Domain.Common.Exceptions;
 
 public class DomainException<TDomain> : Exception where TDomain : IEntity
 {
