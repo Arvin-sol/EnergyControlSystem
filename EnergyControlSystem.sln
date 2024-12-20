@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persistance", "src\Persista
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API", "src\API\API.csproj", "{CAC4AFB4-7EEE-4B7A-BBBA-F5FD32417285}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "src\Common\Common.csproj", "{CFC34D6F-2B4B-4EFB-B59D-87145ACF7F92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,8 +41,15 @@ Global
 		{CAC4AFB4-7EEE-4B7A-BBBA-F5FD32417285}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAC4AFB4-7EEE-4B7A-BBBA-F5FD32417285}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAC4AFB4-7EEE-4B7A-BBBA-F5FD32417285}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFC34D6F-2B4B-4EFB-B59D-87145ACF7F92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFC34D6F-2B4B-4EFB-B59D-87145ACF7F92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFC34D6F-2B4B-4EFB-B59D-87145ACF7F92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFC34D6F-2B4B-4EFB-B59D-87145ACF7F92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D8C46E82-988B-46C5-B7CE-A58C245DC157}
 	EndGlobalSection
 EndGlobal
