@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using Application;
+using Autofac;
 using Domain.Common.Base;
 using Domain.Common.Contracts;
 using FluentValidation;
@@ -13,10 +14,11 @@ public static class AutofacConfigurationExtensions
 
         var entityAssembly = typeof(IEntity).Assembly;
         //var dataAssembly = typeof(TRSContext).Assembly;
+        var applicationPointer = typeof(ApplicationPointer).Assembly;
         //var dataReadOnlyAssembly = typeof(TRSReadOnlyContext).Assembly;
 
 
-        containerBuilder.RegisterAssemblyTypes(ApplicationAssembly)
+        containerBuilder.RegisterAssemblyTypes(applicationPointer)
             .Where(type => type.BaseType != null &&
                            type.BaseType.IsGenericType &&
                            type.BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>))
@@ -25,17 +27,17 @@ public static class AutofacConfigurationExtensions
 
 
 
-        containerBuilder.RegisterAssemblyTypes(entityAssembly)
+        containerBuilder.RegisterAssemblyTypes(entityAssembly, applicationPointer)
             .AssignableTo<IScopedDependency>()
             .AsImplementedInterfaces()
             .InstancePerLifetimeScope();
 
-        containerBuilder.RegisterAssemblyTypes(entityAssembly)
+        containerBuilder.RegisterAssemblyTypes(entityAssembly, applicationPointer)
             .AssignableTo<ITransientDependency>()
             .AsImplementedInterfaces()
             .InstancePerDependency();
 
-        containerBuilder.RegisterAssemblyTypes(entityAssembly)
+        containerBuilder.RegisterAssemblyTypes(entityAssembly, applicationPointer)
             .AssignableTo<ISingletonDependency>()
             .AsImplementedInterfaces()
             .SingleInstance();

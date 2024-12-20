@@ -15,6 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API", "src\API\API.csproj",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "src\Common\Common.csproj", "{CFC34D6F-2B4B-4EFB-B59D-87145ACF7F92}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{7D880ED3-7F6F-496D-862E-8BDAE8EF3382}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infra", "Infra", "{AC86D959-46C9-401B-A5CC-31B43EEA5349}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +52,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{11946731-D852-426B-8EE8-0876A24A7948} = {7D880ED3-7F6F-496D-862E-8BDAE8EF3382}
+		{7B4B53F3-99E7-4DB5-8D1D-4B120E8CBB0D} = {7D880ED3-7F6F-496D-862E-8BDAE8EF3382}
+		{B18DCDB0-11F1-484F-A450-AEAB0A85F5CE} = {AC86D959-46C9-401B-A5CC-31B43EEA5349}
+		{2F9F4410-F305-4789-B87D-F217A99832D5} = {AC86D959-46C9-401B-A5CC-31B43EEA5349}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D8C46E82-988B-46C5-B7CE-A58C245DC157}
