@@ -2,13 +2,17 @@
 using Newtonsoft.Json;
 using System.Net;
 using System.ComponentModel.DataAnnotations;
+using Common.Enums;
+using Common.Exceptions;
+using Microsoft.IdentityModel.Tokens;
+using Common;
 
 namespace API.Extentions;
 
 public static class ExceptionHandlerMiddlewareExtensions
 {
     public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder builder)
-        => builder.UseMiddleware<ExceptionHandlerMiddlewareExtensions>();
+        => builder.UseMiddleware<CustomExceptionHandlerMiddleware>();
 }
 public class CustomExceptionHandlerMiddleware
 {
@@ -35,7 +39,7 @@ public class CustomExceptionHandlerMiddleware
         {
             await _next(context);
         }
-        catch (BadRequestExeption exception)
+        catch (BadRequestException exception)
         {
             _logger.LogError(exception, exception.Message);
             httpStatusCode = exception.HttpStatusCode;
@@ -46,12 +50,12 @@ public class CustomExceptionHandlerMiddleware
                 var dic = new Dictionary<string, string>
                 {
                     ["Exception"] = exception.Message,
-                    ["StackTrace"] = exception.StackTrace,
+                    ["StackTrace"] = exception.StackTrace!,
                 };
                 if (exception.InnerException != null)
                 {
                     dic.Add("InnerException.Exception", exception.InnerException.Message);
-                    dic.Add("InnerException.StackTrace", exception.InnerException.StackTrace);
+                    dic.Add("InnerException.StackTrace", exception.InnerException.StackTrace!);
                 }
                 if (exception.AdditionalData != null)
                     dic.Add("AdditionalData", JsonConvert.SerializeObject(exception.AdditionalData));
@@ -64,7 +68,7 @@ public class CustomExceptionHandlerMiddleware
             }
             await WriteToResponseAsync();
         }
-        catch (e.Exceptions.AppException exception)
+        catch (AppException exception)
         {
             _logger.LogError(exception, exception.Message);
             httpStatusCode = exception.HttpStatusCode;
@@ -75,12 +79,12 @@ public class CustomExceptionHandlerMiddleware
                 var dic = new Dictionary<string, string>
                 {
                     ["Exception"] = exception.Message,
-                    ["StackTrace"] = exception.StackTrace,
+                    ["StackTrace"] = exception.StackTrace!,
                 };
                 if (exception.InnerException != null)
                 {
                     dic.Add("InnerException.Exception", exception.InnerException.Message);
-                    dic.Add("InnerException.StackTrace", exception.InnerException.StackTrace);
+                    dic.Add("InnerException.StackTrace", exception.InnerException.StackTrace!);
                 }
                 if (exception.AdditionalData != null)
                     dic.Add("AdditionalData", JsonConvert.SerializeObject(exception.AdditionalData));
@@ -123,7 +127,7 @@ public class CustomExceptionHandlerMiddleware
                 var dic = new Dictionary<string, string>
                 {
                     ["Exception"] = exception.Message,
-                    ["StackTrace"] = exception.StackTrace,
+                    ["StackTrace"] = exception.StackTrace!,
                 };
                 message = JsonConvert.SerializeObject(dic);
             }
@@ -145,7 +149,7 @@ public class CustomExceptionHandlerMiddleware
             if (context.Response.HasStarted)
                 throw new InvalidOperationException("The response has already started, the http status code middleware will not be executed.");
 
-            var result = new ApiResult(false, apiStatusCode, message);
+            var result = new ApiResult(false, apiStatusCode, message!);
             var json = JsonConvert.SerializeObject(result);
 
             context.Response.StatusCode = (int)httpStatusCode;
@@ -178,7 +182,7 @@ public class CustomExceptionHandlerMiddleware
                 var dic = new Dictionary<string, string>
                 {
                     ["Exception"] = exception.Message,
-                    ["StackTrace"] = exception.StackTrace
+                    ["StackTrace"] = exception.StackTrace!
                 };
                 if (exception is SecurityTokenExpiredException tokenException)
                     dic.Add("Expires", tokenException.Expires.ToString());

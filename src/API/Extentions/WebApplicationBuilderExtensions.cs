@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Common.Enums;
+using Common.Exceptions;
+using Common.Utilities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
+using System.Security.Claims;
 
 namespace API.Extentions;
 
@@ -8,7 +12,7 @@ public static class WebApplicationBuilderExtensions
 {
     private static TokenValidationParameters GetValidationparameters()
     {
-        var res = ValidationParameters.GetValidationparameters();
+        var res = ValidationParameters.GetValidationParameters();
         return res;
     }
     public static WebApplicationBuilder AddAppAuthetication(this WebApplicationBuilder builder)
@@ -30,30 +34,30 @@ public static class WebApplicationBuilderExtensions
                 OnAuthenticationFailed = context =>
                 {
 
-                    if (context.Exception != null)
-                        throw new AppException(ApiResultStatusCode.UnAuthorized, "Authentication failed.", HttpStatusCode.Unauthorized, context.Exception, null);
+                    if (context.Exception is not null)
+                        throw new AppException(ApiResultStatusCode.UnAuthorized, "Authentication failed.", HttpStatusCode.Unauthorized, context.Exception, null!);
 
                     return Task.CompletedTask;
                 },
                 OnChallenge = context =>
                 {
 
-                    if (context.AuthenticateFailure != null)
-                        throw new AppException(ApiResultStatusCode.UnAuthorized, "Authenticate failure.", HttpStatusCode.Unauthorized, context.AuthenticateFailure, null);
+                    if (context.AuthenticateFailure is not null)
+                        throw new AppException(ApiResultStatusCode.UnAuthorized, "Authenticate failure.", HttpStatusCode.Unauthorized, context.AuthenticateFailure, null!);
                     throw new AppException(ApiResultStatusCode.UnAuthorized, "You are unauthorized to access this resource.", HttpStatusCode.Unauthorized);
 
                 },
                 OnTokenValidated = context =>
                 {
                     // Decompress the roles from the token
-                    var rolesClaim = context.Principal.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+                    var rolesClaim = context.Principal!.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
                     var serviceChannelClaim = context.Principal.Claims.FirstOrDefault(c => c.Type == "serviceChannel");
                     const string ServiceChannelClaimType = "serviceChannel";
-                    var identity = (ClaimsIdentity)context.Principal.Identity;
+                    var identity = (ClaimsIdentity)context.Principal.Identity!;
 
 
-                    identity.AddClaim(new Claim(ServiceChannelClaimType, serviceChannelClaim.ToString()));
-                    if (rolesClaim != null)
+                    identity.AddClaim(new Claim(ServiceChannelClaimType, serviceChannelClaim!.ToString()));
+                    if (rolesClaim is not null)
                     {
                         string compressedRoles = rolesClaim.Value;
                         List<string> roles = ClaimOptimizationHelper.DecompressRoles(compressedRoles);

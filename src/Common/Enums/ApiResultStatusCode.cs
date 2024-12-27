@@ -13,4 +13,6 @@ public enum ApiResultStatusCode:byte
     [Display(Name = "کد خطا:2 _ پارامتر های ارسالی معتبر نیستند")] BadRequest = 2,
 
     [Display(Name = "کد خطا:3 _ یافت نشد")] NotFound = 3,
+    [Display(Name = "کد خطا:6 _ خطای احراز هویت")] UnAuthorized = 6,
+    [Display(Name = "اطلاعات قبلا ثبت شده است")] InformationExists = 8,
 }

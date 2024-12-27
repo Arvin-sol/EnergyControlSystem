@@ -1,5 +1,6 @@
 ﻿using Domain.Common;
 using Domain.Common.Base;
+using Domain.Common.Exceptions;
 using static Domain.Aggregates.EquipmentAggregate.Enums.EquipmentEnums;
 
 namespace Domain.Aggregates.EquipmentAggregate.Entities;
@@ -9,6 +10,9 @@ public class Equipment : BaseEntity<ulong>,IAggregateRoot
     public string Name { get; private set; }
     public EquipmentType Type { get; private set; }
     public DateTime LastUpdated { get; private set; }
+
+    public decimal Consumption => _usageLogs.Sum(x => x.Consumption);
+
 
     private readonly List<EnergyUsageLog> _usageLogs = new();
     public IReadOnlyCollection<EnergyUsageLog> UsageLogs => _usageLogs.AsReadOnly();

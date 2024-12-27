@@ -16,8 +16,8 @@ public static class EnumExtensions
         if (attribute == null)
             return value.ToString();
 
-        var propValue = attribute.GetType().GetProperty(property.ToString()).GetValue(attribute, null);
-        return propValue.ToString();
+        var propValue = attribute.GetType().GetProperty(property.ToString())!.GetValue(attribute, null);
+        return propValue!.ToString();
     }
 
 }

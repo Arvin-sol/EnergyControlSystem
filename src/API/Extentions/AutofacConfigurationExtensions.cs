@@ -10,7 +10,7 @@ public static class AutofacConfigurationExtensions
     public static void AddServices(this ContainerBuilder containerBuilder)
     {
 
-        containerBuilder.RegisterGeneric(typeof(EnumService<,>)).As(typeof(IEnumService<,>)).InstancePerDependency();
+        //containerBuilder.RegisterGeneric(typeof(EnumService<,>)).As(typeof(IEnumService<,>)).InstancePerDependency();
 
         var entityAssembly = typeof(IEntity).Assembly;
         //var dataAssembly = typeof(TRSContext).Assembly;

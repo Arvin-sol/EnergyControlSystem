@@ -1,11 +1,13 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Common.Extension;
+using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Confige = Common.Utilities;
 
 namespace API.Extentions;
 
 public static class ValidationParameters
 {
-    public static TokenValidationParameters GetValidationparameters()
+    public static TokenValidationParameters GetValidationParameters()
     {
         var secretKey = Encoding.UTF8.GetBytes(Confige.ConfigurationManager.GetValue("JwtSettings:SecretKey"));
         var encryptionKey = Encoding.UTF8.GetBytes(Confige.ConfigurationManager.GetValue("JwtSettings:EncryptKey"));

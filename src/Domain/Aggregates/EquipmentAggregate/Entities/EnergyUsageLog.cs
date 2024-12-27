@@ -1,6 +1,7 @@
 ﻿using Domain.Common;
 using Domain.Common.Base;
 using Domain.Common.Exceptions;
+using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Aggregates.EquipmentAggregate.Entities;
 
-public class EnergyUsageLog:BaseEntity<ulong>
+public class EnergyUsageLog: ValueObject
 {
+    public DateTime TimeStamp { get; private set; }
     public decimal Consumption { get; private set; }
-    public DateTime Timestamp { get; private set; }
 
     protected EnergyUsageLog() { }
 
@@ -20,13 +21,19 @@ public class EnergyUsageLog:BaseEntity<ulong>
     {
         ValidateConsumption(consumption);
         Consumption = consumption;
-        Timestamp = DateTime.Now;
+        TimeStamp = DateTime.Now;
     }
 
     public static EnergyUsageLog Create(decimal consumption) => new(consumption);
     private static void ValidateConsumption(decimal consumption)
     {
         if (consumption <= 0)
-            throw new DomainException<EnergyUsageLog>("Consumption must be greater than zero.");
+            throw new ArgumentException("Consumption must be greater than zero.");
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return TimeStamp;
+        yield return Consumption;
     }
 }

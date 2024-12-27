@@ -1,4 +1,5 @@
 ﻿using Domain.Common.Base;
+using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,4 @@ public class DomainException<TDomain> : Exception where TDomain : IEntity
 {
     public string DomainName => nameof(TDomain);
     public DomainException(string message) : base(message) { }
-    public DomainException(string message, TDomain entity) : base(message) { }
 }
