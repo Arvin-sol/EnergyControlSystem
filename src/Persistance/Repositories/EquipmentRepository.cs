@@ -3,6 +3,7 @@ using Domain.Aggregates.EquipmentAggregate.Contracts;
 using Domain.Aggregates.EquipmentAggregate.Entities;
 using InfluxDB.Client;
 using InfluxDB.Client.Api.Domain;
+using InfluxDB.Client.Core.Flux.Domain;
 using InfluxDB.Client.Writes;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
@@ -85,7 +86,7 @@ public class EquipmentRepository : IEquipmentRepository
 
         return equipmentsData!;
     }
-
+    #region Private Methods
     private async Task<IReadOnlyCollection<Equipment>> QueryEquipmentsDataAsync(CancellationToken cancellationToken)
     {
         string fluxQuery = @"
@@ -103,43 +104,44 @@ public class EquipmentRepository : IEquipmentRepository
         {
             foreach (var record in table.Records)
             {
-                var equipmentName = record.GetValueByKey("equipment_name")?.ToString();
-                var equipmentTypeString = record.GetValueByKey("equipment_type")?.ToString();
-                var lastUpdatedString = record.GetValueByKey("last_updated")?.ToString();
-                var consumptionString = record.GetValueByKey("consumption")?.ToString();
-
-
-                if (equipmentTypeString!.IsValidEnum(out EquipmentType equipmentType) &&
-                    lastUpdatedString!.IsValidDateTime(out DateTime lastUpdated) &&
-                    !string.IsNullOrEmpty(equipmentName))
-                {
-                    var equipment = Equipment.Create(equipmentName, equipmentType);
-
-
-                    typeof(Equipment).GetProperty("LastUpdated", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                                      ?.SetValue(equipment, lastUpdated);
-
-                    if (consumptionString!.IsValidDecimal(out var consumption) && consumption > 0)
-                        equipment.LogEnergyUsage(consumption);
-
-
+                var equipment = CreateEquipmentFromRecord(record);
+                if (equipment is not null)
                     equipments.Add(equipment);
-                }
             }
         }
 
         return equipments.AsReadOnly();
     }
+    private Equipment? CreateEquipmentFromRecord(FluxRecord record)
+    {
+        var equipmentName = record.GetValueByKey("equipment_name")?.ToString();
+        var equipmentTypeString = record.GetValueByKey("equipment_type")?.ToString();
+        var lastUpdatedString = record.GetValueByKey("last_updated")?.ToString();
+        var consumptionString = record.GetValueByKey("consumption")?.ToString();
 
 
+        if (equipmentTypeString!.IsValidEnum(out EquipmentType equipmentType) &&
+            lastUpdatedString!.IsValidDateTime(out DateTime lastUpdated) &&
+            !string.IsNullOrEmpty(equipmentName))
+        {
+            var equipment = Equipment.Create(equipmentName, equipmentType);
+
+            typeof(Equipment).GetProperty("LastUpdated", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                              ?.SetValue(equipment, lastUpdated);
+
+            if (consumptionString!.IsValidDecimal(out var consumption) && consumption > 0)
+                equipment.LogEnergyUsage(consumption);
 
 
+            return equipment;
+        }
+        return null;
+    }
     private string SerializeToCache(IEnumerable<Equipment> data) 
         => System.Text.Json.JsonSerializer.Serialize(data);
-
     private IReadOnlyCollection<Equipment> DeserializeFromCache(string data) 
         => System.Text.Json.JsonSerializer.Deserialize<List<Equipment>>(data)!;
-
+    #endregion
 
 }
 

@@ -1,7 +1,8 @@
 ﻿
 using MediatR;
 using MassTransit;
-using Application.Dtos;
+using Application.Dtos.Messages;
+using Application.Commands;
 
 namespace Infrastructure.MessageBus;
 
@@ -10,8 +11,23 @@ public class CreateEnergyLogConsumer(IMediator mediator) : IConsumer<CreateEnerg
 {
     private readonly IMediator _mediator = mediator;
 
-    public Task Consume(ConsumeContext<CreateEnergyLogMessage> context)
+    public async Task Consume(ConsumeContext<CreateEnergyLogMessage> context) => await _mediator.Send(new CreateEnergyLogCommand(context.Message.EnergyLog));
+}
+
+
+public class CreateEnergyLogConsumerDefinition : ConsumerDefinition<CreateEnergyLogConsumer>
+{
+    public CreateEnergyLogConsumerDefinition()
     {
-        throw new NotImplementedException();
+        ConcurrentMessageLimit = 5;
+    }
+
+    protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<CreateEnergyLogConsumer> consumerConfigurator)
+    {
+        base.ConfigureConsumer(endpointConfigurator, consumerConfigurator);
+
+        endpointConfigurator.PrefetchCount = 15;
+        endpointConfigurator.DiscardFaultedMessages();
+
     }
 }
