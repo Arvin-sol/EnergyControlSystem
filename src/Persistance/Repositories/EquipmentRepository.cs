@@ -1,10 +1,12 @@
-﻿using Domain.Aggregates.EquipmentAggregate.Contracts;
+﻿using Common.Extension;
+using Domain.Aggregates.EquipmentAggregate.Contracts;
 using Domain.Aggregates.EquipmentAggregate.Entities;
 using InfluxDB.Client;
 using InfluxDB.Client.Api.Domain;
 using InfluxDB.Client.Writes;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
+using static Domain.Aggregates.EquipmentAggregate.Enums.EquipmentEnums;
 
 namespace Persistance.Repositories;
 
@@ -87,20 +89,50 @@ public class EquipmentRepository : IEquipmentRepository
     private async Task<IReadOnlyCollection<Equipment>> QueryEquipmentsDataAsync(CancellationToken cancellationToken)
     {
         string fluxQuery = @"
-            from(bucket: ""your-bucket"")
-                |> range(start: -30d) // Last 30 days
-                |> filter(fn: (r) => r._measurement == ""energy_usage"")
-                |> keep(columns: [""equipment_name"", ""is_active"", ""consumption""])";
-
+        from(bucket: ""your-bucket"")
+        |> range(start: -30d) // Last 30 days
+        |> filter(fn: (r) => r._measurement == ""energy_usage"")
+        |> keep(columns: [""equipment_name"", ""equipment_type"", ""last_updated"", ""consumption""])";
 
         var queryApi = _influxDbClient.GetQueryApi();
-        var result = await queryApi.QueryAsync(fluxQuery, "your-org", cancellationToken: cancellationToken);
+        var fluxTables = await queryApi.QueryAsync(fluxQuery, "your-org", cancellationToken: cancellationToken);
+
+        List<Equipment> equipments = new();
+
+        foreach (var table in fluxTables)
+        {
+            foreach (var record in table.Records)
+            {
+                var equipmentName = record.GetValueByKey("equipment_name")?.ToString();
+                var equipmentTypeString = record.GetValueByKey("equipment_type")?.ToString();
+                var lastUpdatedString = record.GetValueByKey("last_updated")?.ToString();
+                var consumptionString = record.GetValueByKey("consumption")?.ToString();
 
 
-        var equipmentList = result.ToList();
+                if (equipmentTypeString!.IsValidEnum(out EquipmentType equipmentType) &&
+                    lastUpdatedString!.IsValidDateTime(out DateTime lastUpdated) &&
+                    !string.IsNullOrEmpty(equipmentName))
+                {
+                    var equipment = Equipment.Create(equipmentName, equipmentType);
 
-        return equipmentList;
+
+                    typeof(Equipment).GetProperty("LastUpdated", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                                      ?.SetValue(equipment, lastUpdated);
+
+                    if (consumptionString!.IsValidDecimal(out var consumption) && consumption > 0)
+                        equipment.LogEnergyUsage(consumption);
+
+
+                    equipments.Add(equipment);
+                }
+            }
+        }
+
+        return equipments.AsReadOnly();
     }
+
+
+
 
     private string SerializeToCache(IEnumerable<Equipment> data) 
         => System.Text.Json.JsonSerializer.Serialize(data);
