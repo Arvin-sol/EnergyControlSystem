@@ -15,4 +15,5 @@ public enum ApiResultStatusCode:byte
     [Display(Name = "کد خطا:3 _ یافت نشد")] NotFound = 3,
     [Display(Name = "کد خطا:6 _ خطای احراز هویت")] UnAuthorized = 6,
     [Display(Name = "اطلاعات قبلا ثبت شده است")] InformationExists = 8,
+    [Display(Name = "Domain Error")] DomainError = 9,
 }

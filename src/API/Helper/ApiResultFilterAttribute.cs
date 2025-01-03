@@ -6,64 +6,49 @@ using Common.Enums;
 
 namespace API.Helper;
 
+
 public class ApiResultFilterAttribute : ActionFilterAttribute
 {
     public override void OnResultExecuting(ResultExecutingContext context)
     {
-        if (context.Result is OkObjectResult okObjectResult)
+        context.Result = context.Result switch
         {
-            var apiResult = new ApiResult<object>(true, ApiResultStatusCode.Success, okObjectResult.Value!);
-            context.Result = new JsonResult(apiResult) { StatusCode = okObjectResult.StatusCode };
-        }
-        else if (context.Result is OkResult okResult)
-        {
-            var apiResult = new ApiResult(true, ApiResultStatusCode.Success);
-            context.Result = new JsonResult(apiResult) { StatusCode = okResult.StatusCode };
-        }
-        //return BadRequest() method create an ObjectResult with StatusCode 400 in recent versions, So the following code has changed a bit.
-        else if (context.Result is ObjectResult badRequestObjectResult && badRequestObjectResult.StatusCode == 400)
-        {
-            string message = null;
-            switch (badRequestObjectResult.Value)
-            {
-                case ValidationProblemDetails validationProblemDetails:
-                    var errorMessages = validationProblemDetails.Errors.SelectMany(p => p.Value).Distinct();
-                    message = string.Join(" | ", errorMessages);
-                    break;
-                case SerializableError errors:
-                    var errorMessages2 = errors.SelectMany(p => (string[])p.Value).Distinct();
-                    message = string.Join(" | ", errorMessages2);
-                    break;
-                case var value when value != null && !(value is ProblemDetails):
-                    message = badRequestObjectResult.Value!.ToString();
-                    break;
-            }
-
-            var apiResult = new ApiResult(false, ApiResultStatusCode.BadRequest, message!);
-            context.Result = new JsonResult(apiResult) { StatusCode = badRequestObjectResult.StatusCode };
-        }
-        else if (context.Result is ObjectResult notFoundObjectResult && notFoundObjectResult.StatusCode == 404)
-        {
-            string message = null!;
-            if (notFoundObjectResult.Value != null && !(notFoundObjectResult.Value is ProblemDetails))
-                message = notFoundObjectResult.Value.ToString()!;
-
-            //var apiResult = new ApiResult<object>(false, ApiResultStatusCode.NotFound, notFoundObjectResult.Value);
-            var apiResult = new ApiResult(false, ApiResultStatusCode.NotFound, message);
-            context.Result = new JsonResult(apiResult) { StatusCode = notFoundObjectResult.StatusCode };
-        }
-        else if (context.Result is ContentResult contentResult)
-        {
-            var apiResult = new ApiResult(true, ApiResultStatusCode.Success, contentResult.Content!);
-            context.Result = new JsonResult(apiResult) { StatusCode = contentResult.StatusCode };
-        }
-        else if (context.Result is ObjectResult objectResult && objectResult.StatusCode == null
-            && !(objectResult.Value is ApiResult))
-        {
-            var apiResult = new ApiResult<object>(true, ApiResultStatusCode.Success, objectResult.Value!);
-            context.Result = new JsonResult(apiResult) { StatusCode = objectResult.StatusCode };
-        }
+            OkObjectResult okObjectResult => CreateApiResult(okObjectResult.Value, ApiResultStatusCode.Success, okObjectResult.StatusCode),
+            OkResult okResult => CreateApiResult(null, ApiResultStatusCode.Success, okResult.StatusCode),
+            ObjectResult { StatusCode: 400 } badRequestResult => HandleBadRequestResult(badRequestResult),
+            ObjectResult { StatusCode: 404 } notFoundResult => HandleNotFoundResult(notFoundResult),
+            ContentResult contentResult => CreateApiResult(contentResult.Content, ApiResultStatusCode.Success, contentResult.StatusCode),
+            ObjectResult { StatusCode: null, Value: not ApiResult } objectResult => CreateApiResult(objectResult.Value, ApiResultStatusCode.Success, objectResult.StatusCode),
+            _ => context.Result
+        };
 
         base.OnResultExecuting(context);
+    }
+
+    private JsonResult CreateApiResult(object? value, ApiResultStatusCode statusCode, int? statusCodeOverride = null)
+    {
+        ApiResult<object> apiResult = new(true, statusCode, value!);
+        return new JsonResult(apiResult) { StatusCode = statusCodeOverride };
+    }
+
+    private JsonResult HandleBadRequestResult(ObjectResult badRequestResult)
+    {
+        string message = badRequestResult.Value switch
+        {
+            ValidationProblemDetails validationDetails => string.Join(" | ", validationDetails.Errors.SelectMany(p => p.Value).Distinct()),
+            SerializableError errors => string.Join(" | ", errors.SelectMany(p => (string[])p.Value).Distinct()),
+            { } value when value is not ProblemDetails => value.ToString()!,
+            _ => string.Empty
+        };
+
+        ApiResult apiResult = new(false, ApiResultStatusCode.BadRequest, message);
+        return new JsonResult(apiResult) { StatusCode = badRequestResult.StatusCode };
+    }
+
+    private JsonResult HandleNotFoundResult(ObjectResult notFoundResult)
+    {
+        string? message = notFoundResult.Value is not ProblemDetails ? notFoundResult.Value?.ToString() : null;
+        ApiResult apiResult = new(false, ApiResultStatusCode.NotFound, message!);
+        return new JsonResult(apiResult) { StatusCode = notFoundResult.StatusCode };
     }
 }

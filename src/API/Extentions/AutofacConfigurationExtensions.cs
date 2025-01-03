@@ -13,9 +13,7 @@ public static class AutofacConfigurationExtensions
         //containerBuilder.RegisterGeneric(typeof(EnumService<,>)).As(typeof(IEnumService<,>)).InstancePerDependency();
 
         var entityAssembly = typeof(IEntity).Assembly;
-        //var dataAssembly = typeof(TRSContext).Assembly;
         var applicationPointer = typeof(ApplicationPointer).Assembly;
-        //var dataReadOnlyAssembly = typeof(TRSReadOnlyContext).Assembly;
 
 
         containerBuilder.RegisterAssemblyTypes(applicationPointer)
