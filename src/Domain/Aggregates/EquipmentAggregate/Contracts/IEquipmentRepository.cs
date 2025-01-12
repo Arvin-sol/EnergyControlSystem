@@ -8,6 +8,6 @@ namespace Domain.Aggregates.EquipmentAggregate.Contracts;
 public interface IEquipmentRepository:IScopedDependency
 {
     Task CreateEquipmentAsync(Equipment entity, CancellationToken cancellationToken);
-    Task UpdateEquipmentAsync(Equipment entity, CancellationToken cancellationToken);
+    Task LogEquipmentUsageAsync(ulong equipmentId, decimal consumption, CancellationToken cancellationToken);
     Task<IReadOnlyCollection<Equipment>> GetEquipmentsUsageAsync(CancellationToken cancellationToken);
 }

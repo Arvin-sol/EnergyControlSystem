@@ -14,13 +14,7 @@ public class ApiResult
 
     public string Message { get; set; }
 
-    public int? TotalItemCount { get; set; }
 
-    public int? PageNumber { get; set; }
-
-    public int? PageSize { get; set; }
-
-    public int? PageCount { get; set; }
 
     public ApiResult(bool isSuccess, ApiResultStatusCode statusCode, string message = null)
     {
@@ -44,8 +38,6 @@ public class ApiResult
     }
 
     public static implicit operator ApiResult(OkResult result) => new ApiResult(true, ApiResultStatusCode.Success);
-
-
     public static implicit operator ApiResult(BadRequestResult result) => new ApiResult(false, ApiResultStatusCode.BadRequest);
 
     public static implicit operator ApiResult(ContentResult result) => new ApiResult(true, ApiResultStatusCode.Success, result.Content);
@@ -65,10 +57,6 @@ public class ApiResult<TData> : ApiResult
         : base(isSuccess, statusCode, message)
     {
         Data = data;
-        PageNumber = pageNumber;
-        TotalItemCount = totalItemCount;
-        PageSize = pageSize;
-        PageCount = pageCount;
     }
 
     #region Implicit Operators
