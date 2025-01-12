@@ -9,5 +9,6 @@ namespace Application.Dtos.Messages;
 
 public record CreateEnergyLogMessage
 {
+    public required ulong EquipmentId { get; init; }
     public required EnergyLogCuDTO EnergyLog { get; init; }
 }

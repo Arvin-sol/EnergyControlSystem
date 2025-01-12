@@ -11,5 +11,6 @@ public class BaseController(IMediator mediatR) : Controller
 {
     public bool UserIsAuthenticated => HttpContext.User.Identity!.IsAuthenticated;
     protected readonly IMediator _mediatR = mediatR;
+    public ulong CreatorId => User.Identities
 
 }

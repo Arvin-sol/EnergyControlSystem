@@ -11,7 +11,8 @@ public class CreateEnergyLogConsumer(IMediator mediator) : IConsumer<CreateEnerg
 {
     private readonly IMediator _mediator = mediator;
 
-    public async Task Consume(ConsumeContext<CreateEnergyLogMessage> context) => await _mediator.Send(new CreateEnergyLogCommand(context.Message.EnergyLog));
+    public async Task Consume(ConsumeContext<CreateEnergyLogMessage> context) 
+        => await _mediator.Send(new CreateEnergyLogCommand(context.Message.EnergyLog, context.Message.EquipmentId));
 }
 
 
